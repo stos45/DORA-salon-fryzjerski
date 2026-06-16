@@ -1265,11 +1265,16 @@ function initPlacesReviews() {
       out.push((h < 10 ? '0' : '') + h + ':00');
       if (h < to - 1) out.push((h < 10 ? '0' : '') + h + ':30');
     }
-    // deterministic "booked" filter
-    return out.filter(function(s) {
-      return (date.getDate() * 13 + date.getMonth() * 7 + parseInt(s) * 3) % 7 !== 0;
-    });
+    return out;
   }
+
+  var FB_URL = 'https://dora-salon-default-rtdb.firebaseio.com';
+
+  function dateKey(d) {
+    return d.getFullYear() + '-' + (d.getMonth() < 9 ? '0' : '') + (d.getMonth()+1) + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
+  }
+
+  function timeKey(t) { return t.replace(':', '-'); }
 
   function renderS1() {
     document.getElementById('bk-service-list').innerHTML = SVCS.map(function(s, i) {
@@ -1303,14 +1308,11 @@ function initPlacesReviews() {
     document.getElementById('bk-wprev').style.pointerEvents = st.week <= 0 ? 'none' : '';
   }
 
-  function renderSlots() {
-    var el = document.getElementById('bk-slots');
-    if (!st.date) { el.innerHTML = '<p style="color:#9ca3af;text-align:center;padding:36px 0;font-size:.88rem">Wybierz dzień powyżej</p>'; return; }
-    var ss = slots(st.date);
-    if (!ss.length) { el.innerHTML = '<p style="color:#9ca3af;text-align:center;padding:36px 0;font-size:.88rem">Brak terminów w tym dniu</p>'; return; }
+  function buildSlotHTML(ss) {
+    if (!ss.length) return '<p style="color:#9ca3af;text-align:center;padding:36px 0;font-size:.88rem">Brak terminów w tym dniu</p>';
     var g = { 'Rano': [], 'Popołudnie': [], 'Wieczór': [] };
     ss.forEach(function(t) { var h = parseInt(t); if (h < 12) g['Rano'].push(t); else if (h < 17) g['Popołudnie'].push(t); else g['Wieczór'].push(t); });
-    el.innerHTML = Object.keys(g).map(function(label) {
+    return Object.keys(g).map(function(label) {
       var its = g[label];
       var pills = its.map(function(t) {
         var isSel = t === st.time;
@@ -1320,6 +1322,22 @@ function initPlacesReviews() {
       }).join('');
       return '<div style="margin-bottom:16px"><p style="font-size:.72rem;color:#9ca3af;margin:0 0 9px">' + label + ' (' + its.length + ')</p><div style="display:flex;flex-wrap:wrap;gap:7px">' + (its.length ? pills : '<span style="font-size:.78rem;color:#e5e7eb">brak</span>') + '</div></div>';
     }).join('');
+  }
+
+  function renderSlots() {
+    var el = document.getElementById('bk-slots');
+    if (!st.date) { el.innerHTML = '<p style="color:#9ca3af;text-align:center;padding:36px 0;font-size:.88rem">Wybierz dzień powyżej</p>'; return; }
+    el.innerHTML = '<p style="color:#9ca3af;text-align:center;padding:36px 0;font-size:.88rem">Ładowanie terminów…</p>';
+    var all = slots(st.date);
+    var dk = dateKey(st.date);
+    fetch(FB_URL + '/bookings/' + dk + '.json')
+      .then(function(r) { return r.json(); })
+      .then(function(booked) {
+        var taken = booked || {};
+        var free = all.filter(function(t) { return !taken[timeKey(t)]; });
+        el.innerHTML = buildSlotHTML(free);
+      })
+      .catch(function() { el.innerHTML = buildSlotHTML(all); });
   }
 
   function updatePanel() {
@@ -1394,6 +1412,14 @@ function initPlacesReviews() {
       document.getElementById('bk-s4-phone').textContent = phone;
       document.getElementById('bk-s4-summary').textContent = svcName + ' · ' + dateStr + ', godz. ' + timeStr;
       bkGoStep(4);
+    }
+
+    if (st.date && st.time) {
+      fetch(FB_URL + '/bookings/' + dateKey(st.date) + '/' + timeKey(st.time) + '.json', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(true)
+      }).catch(function() {});
     }
 
     var cfg = window._ejsConfig || {};
