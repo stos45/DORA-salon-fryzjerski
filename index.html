@@ -13,13 +13,11 @@
     // 3. Email Templates → Create Template → wklej szablon poniżej → skopiuj Template ID
     // 4. Account → Public Key → skopiuj
     window._ejsConfig = {
-      publicKey:  'TWOJ_PUBLIC_KEY',   // ← z EmailJS → Account → Public Key
-      serviceId:  'TWOJ_SERVICE_ID',   // ← z EmailJS → Email Services
-      templateId: 'TWOJ_TEMPLATE_ID'  // ← z EmailJS → Email Templates
+      publicKey:  '_Pbpip2mKWzk60zQl',
+      serviceId:  'service_vdf49d6',
+      templateId: 'woaa237'
     };
-    if (window._ejsConfig.publicKey !== 'TWOJ_PUBLIC_KEY') {
-      emailjs.init(window._ejsConfig.publicKey);
-    }
+    emailjs.init(window._ejsConfig.publicKey);
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
 
@@ -1399,7 +1397,7 @@ function initPlacesReviews() {
     }
 
     var cfg = window._ejsConfig || {};
-    if (cfg.publicKey && cfg.publicKey !== 'TWOJ_PUBLIC_KEY' && cfg.serviceId && cfg.templateId) {
+    if (cfg.publicKey && cfg.serviceId && cfg.templateId) {
       emailjs.send(cfg.serviceId, cfg.templateId, {
         to_email:   'kulawikhania1@gmail.com',
         imie:       name,
