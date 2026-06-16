@@ -1069,5 +1069,315 @@ function initPlacesReviews() {
     observer.observe(el);
   });
 </script>
+
+<!-- ─── BOOKING MODAL ──────────────────────────────────────────────── -->
+<div id="bk-overlay" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(13,36,38,0.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">
+  <div id="bk-card" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:white;border-radius:20px;box-shadow:0 24px 64px rgba(0,0,0,0.22),0 4px 16px rgba(0,0,0,0.1);width:min(920px,96vw);max-height:90vh;overflow:hidden;display:flex;flex-direction:column">
+
+    <!-- ── STEP 1: Wybierz usługę ── -->
+    <div id="bk-s1" style="display:flex;flex-direction:column;max-height:90vh">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 28px 18px;border-bottom:1px solid #f0fafb;flex-shrink:0">
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:#0d2426;margin:0">Wybierz usługę</h2>
+        <button onclick="bkClose()" style="width:32px;height:32px;border-radius:50%;border:none;background:#f0fafb;cursor:pointer;color:#3a8a8d;font-size:1.1rem;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+      <div id="bk-service-list" style="padding:20px 28px;overflow-y:auto"></div>
+    </div>
+
+    <!-- ── STEP 2: Wybierz termin ── -->
+    <div id="bk-s2" style="display:none;flex:1;min-height:0">
+      <div style="display:flex;min-height:520px;max-height:calc(90vh)">
+
+        <!-- Left: Calendar -->
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+          <!-- header -->
+          <div style="display:flex;align-items:center;gap:8px;padding:18px 24px 0;flex-shrink:0">
+            <button onclick="bkGoStep(1)" style="background:none;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;color:#6b7280;border-radius:8px" onmouseover="this.style.background='#f0fafb'" onmouseout="this.style.background='transparent'">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+            </button>
+            <span id="bk-month" style="font-weight:700;font-size:1.05rem;color:#111827;flex:1"></span>
+            <div style="display:flex;gap:4px">
+              <button id="bk-wprev" onclick="bkWeek(-1)" style="width:30px;height:30px;border:1.5px solid #e5e7eb;border-radius:8px;background:white;cursor:pointer;color:#374151;font-size:1.1rem;line-height:1" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">‹</button>
+              <button onclick="bkWeek(1)" style="width:30px;height:30px;border:1.5px solid #e5e7eb;border-radius:8px;background:white;cursor:pointer;color:#374151;font-size:1.1rem;line-height:1" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">›</button>
+            </div>
+            <button onclick="bkClose()" style="width:32px;height:32px;border-radius:50%;border:none;background:#f0fafb;cursor:pointer;color:#3a8a8d;font-size:1.1rem;display:flex;align-items:center;justify-content:center">✕</button>
+          </div>
+          <!-- days strip -->
+          <div style="padding:14px 24px 0;flex-shrink:0">
+            <div id="bk-days" style="display:flex;gap:6px"></div>
+          </div>
+          <hr style="margin:14px 24px 0;border:none;border-top:1px solid #f3f4f6;flex-shrink:0">
+          <!-- slots -->
+          <div id="bk-slots" style="padding:16px 24px 24px;overflow-y:auto;flex:1"></div>
+        </div>
+
+        <!-- Right: Order panel -->
+        <div style="width:268px;flex-shrink:0;border-left:1px solid #f3f4f6;display:flex;flex-direction:column;background:#fafafa">
+          <div style="flex:1;padding:22px 20px;overflow-y:auto">
+            <p style="font-weight:700;font-size:1rem;color:#111827;margin:0 0 18px">Twoje zamówienie</p>
+            <div style="padding-bottom:14px;border-bottom:1px solid #efefef">
+              <p id="bk-ord-name" style="font-weight:600;font-size:0.875rem;color:#1f2937;margin:0 0 3px"></p>
+              <p id="bk-ord-price-lbl" style="font-size:0.78rem;color:#9ca3af;margin:0"></p>
+            </div>
+            <div style="padding:14px 0;border-bottom:1px solid #efefef">
+              <p style="font-size:0.65rem;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 10px">Fryzjer</p>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:40px;height:40px;border-radius:50%;background:#daf0f1;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:#2d6b6e;font-size:1.1rem;flex-shrink:0">D</div>
+                <div>
+                  <p style="font-weight:600;font-size:0.84rem;color:#111827;margin:0 0 2px">Dorota Wołoch</p>
+                  <p style="font-size:0.72rem;color:#9ca3af;margin:0"><span style="color:#f59e0b">★</span> 5.0 · Google</p>
+                </div>
+              </div>
+            </div>
+            <div id="bk-time-row" style="padding:14px 0;display:none">
+              <p style="font-size:0.65rem;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 6px">Termin</p>
+              <p id="bk-time-display" style="font-weight:600;font-size:0.84rem;color:#1f2937;margin:0"></p>
+            </div>
+          </div>
+          <div style="padding:16px 20px;border-top:1px solid #efefef;background:white;flex-shrink:0">
+            <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+              <span style="color:#374151;font-weight:500;font-size:0.88rem">Łącznie</span>
+              <span id="bk-total" style="font-weight:700;color:#111827;font-size:0.88rem">—</span>
+            </div>
+            <button id="bk-btn-next" onclick="bkGoStep(3)" style="width:100%;padding:13px;border-radius:12px;border:none;background:#3a8a8d;color:white;font-weight:700;font-size:0.9rem;cursor:pointer;opacity:0.35;pointer-events:none;transition:opacity 0.2s">Dalej →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STEP 3: Twoje dane ── -->
+    <div id="bk-s3" style="display:none;flex-direction:column;max-height:90vh">
+      <div style="display:flex;align-items:center;gap:8px;padding:22px 28px 18px;border-bottom:1px solid #f3f4f6;flex-shrink:0">
+        <button onclick="bkGoStep(2)" style="background:none;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;color:#6b7280;border-radius:8px" onmouseover="this.style.background='#f0fafb'" onmouseout="this.style.background='transparent'">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+        </button>
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:#0d2426;margin:0;flex:1">Twoje dane</h2>
+        <button onclick="bkClose()" style="width:32px;height:32px;border-radius:50%;border:none;background:#f0fafb;cursor:pointer;color:#3a8a8d;font-size:1.1rem;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+      <div style="padding:24px 28px;display:flex;gap:24px;flex-wrap:wrap;overflow-y:auto">
+        <!-- form -->
+        <div style="flex:1;min-width:240px">
+          <div style="margin-bottom:14px">
+            <label style="font-size:0.78rem;font-weight:600;color:#374151;display:block;margin-bottom:5px">Imię i nazwisko *</label>
+            <input id="bk-name" type="text" placeholder="np. Anna Kowalska" style="width:100%;box-sizing:border-box;padding:11px 14px;border:1.5px solid #b5e0e2;border-radius:10px;font-size:0.9rem;outline:none;font-family:inherit" onfocus="this.style.borderColor='#3a8a8d';this.style.boxShadow='0 0 0 3px rgba(91,179,182,0.15)'" onblur="this.style.borderColor='#b5e0e2';this.style.boxShadow='none'">
+          </div>
+          <div style="margin-bottom:14px">
+            <label style="font-size:0.78rem;font-weight:600;color:#374151;display:block;margin-bottom:5px">Numer telefonu *</label>
+            <input id="bk-phone" type="tel" placeholder="np. 600 123 456" style="width:100%;box-sizing:border-box;padding:11px 14px;border:1.5px solid #b5e0e2;border-radius:10px;font-size:0.9rem;outline:none;font-family:inherit" onfocus="this.style.borderColor='#3a8a8d';this.style.boxShadow='0 0 0 3px rgba(91,179,182,0.15)'" onblur="this.style.borderColor='#b5e0e2';this.style.boxShadow='none'">
+          </div>
+          <div style="margin-bottom:22px">
+            <label style="font-size:0.78rem;font-weight:600;color:#374151;display:block;margin-bottom:5px">Uwagi (opcjonalnie)</label>
+            <textarea id="bk-notes" placeholder="np. preferencje kolorystyczne, długość włosów..." rows="3" style="width:100%;box-sizing:border-box;padding:11px 14px;border:1.5px solid #b5e0e2;border-radius:10px;font-size:0.9rem;outline:none;resize:vertical;font-family:inherit" onfocus="this.style.borderColor='#3a8a8d';this.style.boxShadow='0 0 0 3px rgba(91,179,182,0.15)'" onblur="this.style.borderColor='#b5e0e2';this.style.boxShadow='none'"></textarea>
+          </div>
+          <button onclick="bkSubmit()" style="width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#2d6b6e,#3a8a8d);color:white;font-weight:700;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
+            Zarezerwuj wizytę
+          </button>
+        </div>
+        <!-- summary panel -->
+        <div style="width:210px;flex-shrink:0;background:#f9fafb;border-radius:14px;padding:18px;align-self:flex-start">
+          <p style="font-size:0.65rem;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 12px">Podsumowanie</p>
+          <p id="bk-s3-svc" style="font-weight:600;color:#1f2937;font-size:0.84rem;margin:0 0 6px"></p>
+          <p id="bk-s3-time" style="font-weight:700;color:#2d6b6e;font-size:0.84rem;margin:0 0 16px"></p>
+          <div style="border-top:1px solid #e5e7eb;padding-top:14px;display:flex;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;border-radius:50%;background:#daf0f1;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:#2d6b6e;flex-shrink:0">D</div>
+            <div>
+              <p style="font-weight:600;font-size:0.8rem;color:#1f2937;margin:0">Dorota Wołoch</p>
+              <p style="font-size:0.72rem;color:#9ca3af;margin:0">Klub Fryzjerski DORA</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STEP 4: Potwierdzenie ── -->
+    <div id="bk-s4" style="display:none;padding:52px 32px;text-align:center">
+      <div style="width:68px;height:68px;border-radius:50%;background:#daf0f1;display:flex;align-items:center;justify-content:center;margin:0 auto 22px">
+        <svg width="34" height="34" fill="none" stroke="#2d6b6e" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+      </div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:#0d2426;margin:0 0 10px">Prośba wysłana!</h2>
+      <p style="color:#2d6b6e;line-height:1.7;margin:0 0 6px">Dziękujemy, <span id="bk-s4-name" style="font-weight:700"></span>!</p>
+      <p style="color:#6b7280;font-size:0.88rem;line-height:1.7;margin:0">Zadzwonimy na <strong id="bk-s4-phone" style="color:#374151"></strong>, by potwierdzić termin.</p>
+      <div style="margin:18px auto 0;padding:14px 22px;background:#f0fafb;border-radius:12px;display:inline-block;max-width:380px">
+        <p id="bk-s4-summary" style="font-weight:600;color:#0d2426;font-size:0.84rem;margin:0"></p>
+      </div><br>
+      <button onclick="bkClose()" style="margin-top:24px;padding:11px 32px;border-radius:12px;border:1.5px solid #2d6b6e;background:white;color:#2d6b6e;font-weight:600;cursor:pointer;font-size:0.88rem" onmouseover="this.style.background='#f0fafb'" onmouseout="this.style.background='white'">Zamknij</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var DAYS   = ['Nd','Pn','Wt','Śr','Cz','Pt','Sb'];
+  var MONTHS = ['styczeń','luty','marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień'];
+  var MGEN   = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+
+  var SVCS = [
+    { name:'Strzyżenie damskie (mycie + modelowanie)', price:'wycena indywidualna', ic:'<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>' },
+    { name:'Strzyżenie damskie (bez mycia)',            price:'wycena indywidualna', ic:'<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>' },
+    { name:'Strzyżenie męskie',                         price:'wycena indywidualna', ic:'<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"/></svg>' },
+    { name:'Koloryzacja całościowa',                    price:'wycena indywidualna', ic:'<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"/></svg>' },
+    { name:'Pasemka / balayage / ombre',                price:'wycena indywidualna', ic:'<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>' },
+    { name:'Trwała ondulacja',                          price:'od 200 zł',           ic:'<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>' },
+    { name:'Pielęgnacja włosów',                        price:'wycena indywidualna', ic:'<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.5c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 012.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 00.322-1.672V3a.75.75 0 01.75-.75A2.25 2.25 0 0116.5 4.5c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 01-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 00-1.423-.23H5.904"/></svg>' },
+    { name:'Stylizacja i modelowanie',                  price:'wycena indywidualna', ic:'<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>' },
+  ];
+
+  var st = { week: 0, date: null, time: null, svc: null };
+
+  function monday(offset) {
+    var d = new Date(); d.setHours(0,0,0,0);
+    var w = d.getDay() || 7;
+    d.setDate(d.getDate() - w + 1 + offset * 7);
+    return d;
+  }
+
+  function slots(date) {
+    var day = date.getDay();
+    var today = new Date(); today.setHours(0,0,0,0);
+    if (date < today || day === 0) return [];
+    var from, to;
+    if (day === 1 || day === 3 || day === 5) { from = 14; to = 20; }
+    else if (day === 2 || day === 4)          { from = 8;  to = 16; }
+    else                                       { from = 8;  to = 13; }
+    var out = [];
+    for (var h = from; h < to; h++) {
+      out.push((h < 10 ? '0' : '') + h + ':00');
+      if (h < to - 1) out.push((h < 10 ? '0' : '') + h + ':30');
+    }
+    // deterministic "booked" filter
+    return out.filter(function(s) {
+      return (date.getDate() * 13 + date.getMonth() * 7 + parseInt(s) * 3) % 7 !== 0;
+    });
+  }
+
+  function renderS1() {
+    document.getElementById('bk-service-list').innerHTML = SVCS.map(function(s, i) {
+      return '<button onclick="bkPickSvc(' + i + ')" style="width:100%;display:flex;align-items:center;gap:14px;padding:13px 15px;border:1.5px solid #e5e7eb;border-radius:12px;background:white;cursor:pointer;text-align:left;margin-bottom:9px;transition:border-color .15s,background .15s" onmouseover="this.style.borderColor=\'#3a8a8d\';this.style.background=\'#f0fafb\'" onmouseout="this.style.borderColor=\'#e5e7eb\';this.style.background=\'white\'">'
+        + '<div style="width:38px;height:38px;border-radius:9px;background:#f0fafb;border:1px solid #daf0f1;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#3a8a8d">' + s.ic + '</div>'
+        + '<div style="flex:1"><p style="font-weight:600;color:#1f2937;font-size:0.88rem;margin:0 0 2px">' + s.name + '</p><p style="font-size:0.76rem;color:#9ca3af;margin:0">' + s.price + '</p></div>'
+        + '<svg width="15" height="15" fill="none" stroke="#d1d5db" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>';
+    }).join('');
+  }
+
+  function renderDays() {
+    var mon = monday(st.week);
+    var today = new Date(); today.setHours(0,0,0,0);
+    var html = '';
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(mon); d.setDate(mon.getDate() + i);
+      var dis = d < today || d.getDay() === 0;
+      var sel = st.date && d.toDateString() === st.date.toDateString();
+      var has = !dis && slots(d).length > 0;
+      html += '<button ' + (dis ? '' : 'onclick="bkPickDay(' + d.getTime() + ')"')
+        + ' style="flex:1;padding:7px 3px;border-radius:11px;border:none;cursor:' + (dis ? 'not-allowed' : 'pointer') + ';background:' + (sel ? '#3a8a8d' : 'transparent') + ';opacity:' + (dis ? '.28' : '1') + ';transition:background .15s"'
+        + (!sel && !dis ? ' onmouseover="this.style.background=\'#f0fafb\'" onmouseout="this.style.background=\'transparent\'"' : '')
+        + '><p style="font-size:1rem;font-weight:600;color:' + (sel ? 'white' : '#1f2937') + ';margin:0 0 2px">' + d.getDate() + '</p>'
+        + '<p style="font-size:0.58rem;color:' + (sel ? '#daf0f1' : '#9ca3af') + ';text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px">' + DAYS[d.getDay()] + '</p>'
+        + '<div style="width:5px;height:5px;border-radius:50%;background:' + (sel ? 'rgba(255,255,255,.7)' : (has ? '#3a8a8d' : 'transparent')) + ';margin:0 auto"></div></button>';
+    }
+    document.getElementById('bk-days').innerHTML = html;
+    var mid = new Date(mon); mid.setDate(mon.getDate() + 3);
+    document.getElementById('bk-month').textContent = MONTHS[mid.getMonth()] + ' ' + mid.getFullYear();
+    document.getElementById('bk-wprev').style.opacity = st.week <= 0 ? '.3' : '1';
+    document.getElementById('bk-wprev').style.pointerEvents = st.week <= 0 ? 'none' : '';
+  }
+
+  function renderSlots() {
+    var el = document.getElementById('bk-slots');
+    if (!st.date) { el.innerHTML = '<p style="color:#9ca3af;text-align:center;padding:36px 0;font-size:.88rem">Wybierz dzień powyżej</p>'; return; }
+    var ss = slots(st.date);
+    if (!ss.length) { el.innerHTML = '<p style="color:#9ca3af;text-align:center;padding:36px 0;font-size:.88rem">Brak terminów w tym dniu</p>'; return; }
+    var g = { 'Rano': [], 'Popołudnie': [], 'Wieczór': [] };
+    ss.forEach(function(t) { var h = parseInt(t); if (h < 12) g['Rano'].push(t); else if (h < 17) g['Popołudnie'].push(t); else g['Wieczór'].push(t); });
+    el.innerHTML = Object.keys(g).map(function(label) {
+      var its = g[label];
+      var pills = its.map(function(t) {
+        var isSel = t === st.time;
+        return '<button onclick="bkPickTime(\'' + t + '\')" style="padding:8px 17px;border-radius:50px;border:1.5px solid ' + (isSel ? '#3a8a8d' : '#d1d5db') + ';background:' + (isSel ? '#3a8a8d' : 'white') + ';color:' + (isSel ? 'white' : '#374151') + ';font-weight:600;font-size:.82rem;cursor:pointer;transition:all .15s"'
+          + (!isSel ? ' onmouseover="this.style.borderColor=\'#3a8a8d\';this.style.color=\'#3a8a8d\'" onmouseout="this.style.borderColor=\'#d1d5db\';this.style.color=\'#374151\'"' : '')
+          + '>' + t + '</button>';
+      }).join('');
+      return '<div style="margin-bottom:16px"><p style="font-size:.72rem;color:#9ca3af;margin:0 0 9px">' + label + ' (' + its.length + ')</p><div style="display:flex;flex-wrap:wrap;gap:7px">' + (its.length ? pills : '<span style="font-size:.78rem;color:#e5e7eb">brak</span>') + '</div></div>';
+    }).join('');
+  }
+
+  function updatePanel() {
+    if (st.svc) { document.getElementById('bk-ord-name').textContent = st.svc.name; document.getElementById('bk-ord-price-lbl').textContent = st.svc.price; document.getElementById('bk-total').textContent = st.svc.price; }
+    if (st.date && st.time) {
+      document.getElementById('bk-time-display').textContent = st.date.getDate() + ' ' + MGEN[st.date.getMonth()] + ' ' + st.date.getFullYear() + ', godz. ' + st.time;
+      document.getElementById('bk-time-row').style.display = 'block';
+    } else { document.getElementById('bk-time-row').style.display = 'none'; }
+    var ready = !!(st.date && st.time);
+    document.getElementById('bk-btn-next').style.opacity = ready ? '1' : '.35';
+    document.getElementById('bk-btn-next').style.pointerEvents = ready ? '' : 'none';
+  }
+
+  window.bkOpen = function() {
+    st = { week: 0, date: null, time: null, svc: null };
+    document.getElementById('bk-overlay').style.display = '';
+    document.body.style.overflow = 'hidden';
+    bkGoStep(1);
+  };
+
+  window.bkClose = function() {
+    document.getElementById('bk-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+  };
+
+  window.bkGoStep = function(n) {
+    ['bk-s1','bk-s2','bk-s3','bk-s4'].forEach(function(id, i) {
+      var el = document.getElementById(id);
+      if (i + 1 === n) {
+        el.style.display = (n === 2) ? 'flex' : (n === 3 ? 'flex' : '');
+        el.style.flexDirection = (n === 3 || n === 1) ? 'column' : '';
+      } else { el.style.display = 'none'; }
+    });
+    if (n === 1) renderS1();
+    if (n === 2) { renderDays(); renderSlots(); updatePanel(); }
+    if (n === 3) {
+      document.getElementById('bk-s3-svc').textContent = st.svc ? st.svc.name : '';
+      document.getElementById('bk-s3-time').textContent = (st.date && st.time) ? st.date.getDate() + ' ' + MGEN[st.date.getMonth()] + ', godz. ' + st.time : '';
+    }
+  };
+
+  window.bkPickSvc = function(i) { st.svc = SVCS[i]; bkGoStep(2); };
+
+  window.bkPickDay = function(ts) { st.date = new Date(ts); st.time = null; renderDays(); renderSlots(); updatePanel(); };
+
+  window.bkPickTime = function(t) { st.time = t; renderSlots(); updatePanel(); };
+
+  window.bkWeek = function(dir) {
+    if (st.week + dir < 0) return;
+    st.week += dir; st.date = null; st.time = null;
+    renderDays(); renderSlots(); updatePanel();
+    document.getElementById('bk-btn-next').style.opacity = '.35';
+    document.getElementById('bk-btn-next').style.pointerEvents = 'none';
+  };
+
+  window.bkSubmit = function() {
+    var name  = (document.getElementById('bk-name').value  || '').trim();
+    var phone = (document.getElementById('bk-phone').value || '').trim();
+    if (!name)  { document.getElementById('bk-name').style.borderColor  = '#ef4444'; document.getElementById('bk-name').focus();  return; }
+    if (!phone) { document.getElementById('bk-phone').style.borderColor = '#ef4444'; document.getElementById('bk-phone').focus(); return; }
+    document.getElementById('bk-s4-name').textContent  = name.split(' ')[0];
+    document.getElementById('bk-s4-phone').textContent = phone;
+    document.getElementById('bk-s4-summary').textContent = (st.svc ? st.svc.name : '') + ' · ' + (st.date ? st.date.getDate() + ' ' + MGEN[st.date.getMonth()] : '') + ', godz. ' + (st.time || '');
+    bkGoStep(4);
+  };
+
+  // close on backdrop
+  document.getElementById('bk-overlay').addEventListener('click', function(e) { if (e.target === this) bkClose(); });
+
+  // wire up all "Umów wizytę" / "Zarezerwuj" links
+  document.querySelectorAll('a').forEach(function(a) {
+    if (/Um[oó]w|Zarezerwuj/i.test(a.textContent.trim())) {
+      a.addEventListener('click', function(e) { e.preventDefault(); bkOpen(); });
+    }
+  });
+}());
+</script>
 </body>
 </html>
