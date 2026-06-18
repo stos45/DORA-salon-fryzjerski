@@ -1434,13 +1434,14 @@ function initPlacesReviews() {
     if (cfg.publicKey && cfg.serviceId && cfg.templateId) {
       emailjs.send(cfg.serviceId, cfg.templateId, {
         to_email:   'kulawikhania1@gmail.com',
+        name:       name,
         imie:       name,
         telefon:    phone,
         usluga:     svcName,
         data:       dateStr,
         godzina:    timeStr,
         uwagi:      notes || 'Brak'
-      }).then(finish, finish);
+      }).then(finish, function(err) { console.error('EmailJS error:', err); finish(); });
     } else {
       finish();
     }
