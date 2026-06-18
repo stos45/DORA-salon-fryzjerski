@@ -313,7 +313,7 @@
         <!-- Floating card -->
         <div class="absolute -bottom-6 -left-10 bg-white rounded-2xl p-4 shadow-float w-48">
           <p class="text-xs text-teal-600 font-medium uppercase tracking-widest mb-1">Najbliższy wolny termin</p>
-          <p class="font-display font-semibold text-teal-900 text-sm">Dziś, 15:30</p>
+          <p id="next-slot-display" class="font-display font-semibold text-teal-900 text-sm">Szukam…</p>
           <a href="#rezerwacja" class="mt-2 block text-center bg-teal-600 text-white text-xs font-medium py-1.5 rounded-lg btn-primary">
             Zarezerwuj
           </a>
@@ -1455,6 +1455,39 @@ function initPlacesReviews() {
       a.addEventListener('click', function(e) { e.preventDefault(); bkOpen(); });
     }
   });
+
+  // Next available slot widget
+  (function findNextSlot() {
+    var DAYS_SHORT = ['Nd','Pn','Wt','Śr','Cz','Pt','Sb'];
+    var MONTHS_SHORT = ['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
+    var el = document.getElementById('next-slot-display');
+    if (!el) return;
+    var today = new Date(); today.setHours(0,0,0,0);
+    var checked = 0;
+    function tryDay(d) {
+      if (checked++ > 21) { el.textContent = 'Brak wolnych terminów'; return; }
+      var ss = slots(d);
+      if (!ss.length) { var nd = new Date(d); nd.setDate(nd.getDate()+1); tryDay(nd); return; }
+      var dk = dateKey(d);
+      fetch(FB_URL + '/bookings/' + dk + '.json')
+        .then(function(r) { return r.json(); })
+        .then(function(booked) {
+          var taken = booked || {};
+          var free = ss.filter(function(t) { return !taken[timeKey(t)]; });
+          if (!free.length) { var nd = new Date(d); nd.setDate(nd.getDate()+1); tryDay(nd); return; }
+          var diff = Math.round((d - today) / 86400000);
+          var prefix = diff === 1 ? 'Jutro' : DAYS_SHORT[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_SHORT[d.getMonth()];
+          el.textContent = prefix + ', ' + free[0];
+        })
+        .catch(function() {
+          var diff = Math.round((d - today) / 86400000);
+          var prefix = diff === 1 ? 'Jutro' : DAYS_SHORT[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_SHORT[d.getMonth()];
+          el.textContent = prefix + ', ' + ss[0];
+        });
+    }
+    var start = new Date(today); start.setDate(today.getDate() + 1);
+    tryDay(start);
+  }());
 }());
 </script>
 </body>
