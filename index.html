@@ -1255,7 +1255,7 @@ function initPlacesReviews() {
   function slots(date) {
     var day = date.getDay();
     var today = new Date(); today.setHours(0,0,0,0);
-    if (date < today || day === 0) return [];
+    if (date <= today || day === 0) return [];
     var from, to;
     if (day === 1 || day === 3 || day === 5) { from = 14; to = 20; }
     else if (day === 2 || day === 4)          { from = 8;  to = 16; }
@@ -1299,7 +1299,7 @@ function initPlacesReviews() {
     var html = '';
     for (var i = 0; i < 7; i++) {
       var d = new Date(mon); d.setDate(mon.getDate() + i);
-      var dis = d < today || d.getDay() === 0;
+      var dis = d <= today || d.getDay() === 0;
       var sel = st.date && d.toDateString() === st.date.toDateString();
       var has = !dis && slots(d).length > 0;
       html += '<button ' + (dis ? '' : 'onclick="bkPickDay(' + d.getTime() + ')"')
