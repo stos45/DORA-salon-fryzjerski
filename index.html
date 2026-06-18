@@ -17,7 +17,6 @@
       serviceId:  'service_vdf49d6',
       templateId: 'woaa237'
     };
-    emailjs.init(window._ejsConfig.publicKey);
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
 
@@ -1441,7 +1440,7 @@ function initPlacesReviews() {
         data:       dateStr,
         godzina:    timeStr,
         uwagi:      notes || 'Brak'
-      }).then(finish, function(err) { console.error('EmailJS error:', err); finish(); });
+      }, { publicKey: cfg.publicKey }).then(finish, function(err) { console.error('EmailJS error:', JSON.stringify(err)); finish(); });
     } else {
       finish();
     }
